@@ -2,7 +2,7 @@ from vapoursynth import core
 import vapoursynth as vs
   
 '''    
-Creates a rectangular "mask" for a fix to be applied to.  Cropped area must be mod 4 for YUV420 or mod 2 for YUV422.
+Creates a rectangular "mask" for a fix to be applied to.
 '''
 def rekt(src, fix, left=0, right=0, top=0, bottom=0):
 	if src.format.num_planes == 3:
@@ -29,7 +29,6 @@ def rekt(src, fix, left=0, right=0, top=0, bottom=0):
   
 '''
 Creates a rectangular "mask" in which a fix is applied to only the masked area.  This vastly speeds up filters like anti-aliasing and scaling.
-Cropped area must be mod 4 for YUV420 or mod 2 for YUV422
 This wrapper works with a lambda function called m, which is applied to the "m" clip later on:
 
 rekt_fast(src, fun = lambda m: taa.TAAmbk(m, aatype=3, preaa=-1, strength=-1, masktype=2), left=2, right=8, top=10, bottom=2)
