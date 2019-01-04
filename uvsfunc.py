@@ -4,24 +4,24 @@ import vapoursynth as vs
 '''    
 Creates a rectangular "mask" for a fix to be applied to.
 '''
-def rekt(src, fix, left=0, right=0, top=0, bottom=0):
-	if src.format.num_planes == 3:
-		if get_subsampling(src) == '420':
-			if src.width-left-right % 4 != 0 or src.height-top-bottom % 4 != 0:
-				raise ValueError("rekt: fix height and width must be mod 4 if source clip's color space is YUV420.")
-		if get_subsampling(src) == '422':
-			if src.width-left-right % 2 != 0:
-				raise ValueError("rekt: fix width must be mod 2 if source clip's color space is YUV422.")
-	else:
+def rekt(src, fix, left=0, top=0, right=0, bottom=0):
+	# if src.format.num_planes == 3:
+		# if get_subsampling(src) == '420':
+			# if src.width-left-right % 4 != 0 or src.height-top-bottom % 4 != 0:
+				# raise ValueError("rekt: fix height and width must be mod 4 if source clip's color space is YUV420.")
+		# if get_subsampling(src) == '422':
+			# if src.width-left-right % 2 != 0:
+				# raise ValueError("rekt: fix width must be mod 2 if source clip's color space is YUV422.")
+	#else:
 		if left > 0 or right > 0:
-		    m = core.std.Crop(fix, left=left, right=right)
-    	    l = core.std.Crop(src, right=src.width - left) if left > 0 else 0
-        	r = core.std.Crop(src, left=src.width - right) if right > 0 else 0
-	        params = [x for x in [l, m, r] if x != 0]
-    	    m = core.std.StackHorizontal(params)
+			m = core.std.Crop(fix, left=left, right=right)
+			l = core.std.Crop(src, right=src.width - left) if left > 0 else 0
+			r = core.std.Crop(src, left=src.width - right) if right > 0 else 0
+			params = [x for x in [l, m, r] if x != 0]
+			m = core.std.StackHorizontal(params)
 		if top > 0 or bottom > 0:
-         	t = core.std.Crop(src, bottom=src.height - top) if top > 0 else 0
-          	m = core.std.Crop(m, bottom=bottom, top=top)
+			t = core.std.Crop(src, bottom=src.height - top) if top > 0 else 0
+			m = core.std.Crop(m, bottom=bottom, top=top)
 			b = core.std.Crop(src, top=src.height - bottom) if bottom > 0 else 0
 			params = [x for x in [t, m, b] if x != 0]
 			m = core.std.StackVertical(params)
@@ -38,15 +38,15 @@ Results in the following function being applied to only the masked rectangle:
 def f(m):
     return taa.TAAmbk(m, aatype=3, preaa=-1, strength=-1, masktype=2)
 '''
-def rekt_fast(src, fun=lambda x: x, left=0, right=0, top=0, bottom=0):
-	if src.format.num_planes == 3:
-		if get_subsampling(src) == '420':
-			if src.width-left-right % 4 != 0 or src.height-top-bottom % 4 != 0:
-				raise ValueError("rekt_fast: fix height and width must be mod 4 if source clip's color space is YUV420.")
-		if get_subsampling(src) == '422':
-			if src.width-left-right % 2 != 0:
-				raise ValueError("rekt_fast: fix width must be mod 2 if source clip's color space is YUV422.")
-	else:
+def rekt_fast(src, fun=lambda x: x, left=0, top=0, right=0, bottom=0):
+	# if src.format.num_planes == 3:
+		# if get_subsampling(src) == '420':
+			# if src.width-left-right % 4 != 0 or src.height-top-bottom % 4 != 0:
+				# raise ValueError("rekt_fast: fix height and width must be mod 4 if source clip's color space is YUV420.")
+		# if get_subsampling(src) == '422':
+			# if src.width-left-right % 2 != 0:
+				# raise ValueError("rekt_fast: fix width must be mod 2 if source clip's color space is YUV422.")
+	#else:
 		m = core.std.Crop(src, left=left, right=right, bottom=bottom, top=top)
 		if left > 0 or right > 0:
 			m = fun(m).std.AddBorders(top=top, bottom=bottom)
@@ -67,13 +67,23 @@ def rekt_fast(src, fun=lambda x: x, left=0, right=0, top=0, bottom=0):
 '''
 Anti-aliasing alias.
 '''
-def rektaa(clip, left=0, right=0, top=0, bottom=0, aatype=3, aatypeu=None, aatypev=None, preaa=0, strength=-1, cycle=0, mtype=None, mclip=None,
+def rektaa(clip, left=0, top=0, right=0, bottom=0, aatype=3, aatypeu=None, aatypev=None, preaa=0, strength=-1, cycle=0, mtype=None, masktype=None, mclip=None,
            mthr=None, mthr2=None, mlthresh=None, mpand=(1, 0), txtmask=0, txtfade=0, thin=0, dark=0.0, sharp=0,
            aarepair=0, postaa=None, src=None, stabilize=0, down8=True, showmask=0, opencl=False, opencl_device=0):
 	import vsTAAmbk as taa
-	return rekt_fast(clip, left=left, right=right, top=top, bottom=bottom, fun=lambda x: taa.TAAmbk(x, aatype=aatype, aatypeu=aatypeu, aatypev=aatypev, preaa=preaa, strength=strength, cycle=cycle, mtype=mtype, mclip=mclip,
+	if masktype != None:
+		return rekt_fast(clip, left=left, right=right, top=top, bottom=bottom, fun=lambda x: taa.TAAmbk(x, aatype=aatype, aatypeu=aatypeu, aatypev=aatypev, preaa=preaa, strength=strength, cycle=cycle, mtype=masktype, mclip=mclip,
            mthr=mthr, mthr2=mthr2, mlthresh=mlthresh, mpand=mpand, txtmask=txtmask, txtfade=txtfade, thin=thin, dark=dark, sharp=sharp,
-           aarepair=aarepar, postaa=postaa, src=src, stabilize=stabilize, down8=down8, showmask=showmask, opencl=opencl, opencl_device=opencl_device))
+           aarepair=aarepair, postaa=postaa, src=src, stabilize=stabilize, down8=down8, showmask=showmask, opencl=opencl, opencl_device=opencl_device))
+	elif mtype != None:
+		return rekt_fast(clip, left=left, right=right, top=top, bottom=bottom, fun=lambda x: taa.TAAmbk(x, aatype=aatype, aatypeu=aatypeu, aatypev=aatypev, preaa=preaa, strength=strength, cycle=cycle, mtype=masktype, mclip=mclip,
+           mthr=mthr, mthr2=mthr2, mlthresh=mlthresh, mpand=mpand, txtmask=txtmask, txtfade=txtfade, thin=thin, dark=dark, sharp=sharp,
+           aarepair=aarepair, postaa=postaa, src=src, stabilize=stabilize, down8=down8, showmask=showmask, opencl=opencl, opencl_device=opencl_device))
+	else:
+		return rekt_fast(clip, left=left, right=right, top=top, bottom=bottom, fun=lambda x: taa.TAAmbk(x, aatype=aatype, aatypeu=aatypeu, aatypev=aatypev, preaa=preaa, strength=strength, cycle=cycle, mtype=masktype, mclip=mclip,
+           mthr=mthr, mthr2=mthr2, mlthresh=mlthresh, mpand=mpand, txtmask=txtmask, txtfade=txtfade, thin=thin, dark=dark, sharp=sharp,
+           aarepair=aarepair, postaa=postaa, src=src, stabilize=stabilize, down8=down8, showmask=showmask, opencl=opencl, opencl_device=opencl_device))
+
 
 '''
 Tool to highlight black lines on borders and place them in the middle. Such lines should then create a straight line or even a cross if horizontal and vertical lines line up accordingly.
@@ -109,37 +119,37 @@ def black_detect(clip, thresh=None, fix=False, left=0, right=0, top=0, bottom=0)
 Stupid downscaling that should automatically calculate the correct width and height.
 '''
 def ds(clip, size=720, sar=16/9):
-    ar = clip.width / clip.height
-    if ar > (sar):
-    	width = size * ar
-        height = size
-    	w = round((width * ar) / 2) * 2
-    	h = round((height * (1 / ar)) / 2) * 2
-    if ar < (sar):
-    	width = size * (sar**(-1))
-        height = size * ar
-    	w = round((width * ar) / 2) * 2
-    	h = round((height * (1 / ar)) / 2) * 2
-    return core.resize.Spline36(clip, w, h)
+	ar = clip.width / clip.height
+	if ar > (sar):
+		width = size * ar
+		height = size
+		w = round((width * ar) / 2) * 2
+		h = round((height * (1 / ar)) / 2) * 2
+	if ar < (sar):
+		width = size * (sar**(-1))
+		height = size * ar
+		w = round((width * ar) / 2) * 2
+		h = round((height * (1 / ar)) / 2) * 2
+	return core.resize.Spline36(clip, w, h)
 
-# stolen from kagefunc
+# # stolen from kagefunc
 
-def get_subsampling(src):
-    """
-    returns string to be used with fmtc.resample
-    """
-    if src.format.subsampling_w == 1 and src.format.subsampling_h == 1:
-        css = '420'
-    elif src.format.subsampling_w == 1 and src.format.subsampling_h == 0:
-        css = '422'
-    elif src.format.subsampling_w == 0 and src.format.subsampling_h == 0:
-        css = '444'
-    elif src.format.subsampling_w == 2 and src.format.subsampling_h == 2:
-        css = '410'
-    elif src.format.subsampling_w == 2 and src.format.subsampling_h == 0:
-        css = '411'
-    elif src.format.subsampling_w == 0 and src.format.subsampling_h == 1:
-        css = '440'
-    else:
-        raise ValueError('Unknown subsampling')
-	return css
+# def get_subsampling(src):
+	# """
+	# returns string to be used with fmtc.resample
+	# """
+	# if src.format.subsampling_w == 1 and src.format.subsampling_h == 1:
+		# css = '420'
+	# elif src.format.subsampling_w == 1 and src.format.subsampling_h == 0:
+		# css = '422'
+	# elif src.format.subsampling_w == 0 and src.format.subsampling_h == 0:
+		# css = '444'
+	# elif src.format.subsampling_w == 2 and src.format.subsampling_h == 2:
+		# css = '410'
+	# elif src.format.subsampling_w == 2 and src.format.subsampling_h == 0:
+		# css = '411'
+	# elif src.format.subsampling_w == 0 and src.format.subsampling_h == 1:
+		# css = '440'
+	# else:
+		# raise ValueError('Unknown subsampling')
+	# return css
