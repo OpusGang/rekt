@@ -105,8 +105,8 @@ def rektdb(clip, left=0, top=0, right=0, bottom=0,
            blur_first=True, dynamic_grain=True,
            opt=-1, dither_algo=3, keep_tv_range=False,
            output_depth=16, random_algo_ref=1, random_param_ref=1, random_param_grain=1,
-           preset=None, mask=retinex):
-    if mask == retinex:
+           preset=None, mask='retinex', thry=40, thrc=None, radiusy=12, radiusc=8, mask_thr=2, mask_radius):
+    if mask == 'retinex':
         import fvsfunc as fvf
         import kagefunc as kgf
         clip = fvf.Depth(16)
@@ -124,6 +124,13 @@ def rektdb(clip, left=0, top=0, right=0, bottom=0,
                                                            random_param_grain=random_param_grain,
                                                            preset=preset))
         return core.std.MaskedMerge(deband, clip, m)
+
+    elif mask == 'gradfun3' or mask == 'fag':
+        return rekt_fast(clip=clip,
+                         fun=lambda x: fag3kdb(x, thry=thry, thrc=thrc, radiusy=radiusy, radiusc=radiusc, grainy=grainy,
+                                               grainc=grainc, dynamic_grainy=dynamic_grain,
+                                               dynamic_grainc=dynamic_grain, mask_thr=mask_thr, mask_radius=mask_radius,
+                                               keep_tv_range=keep_tv_range))
 
     elif mask != None:
         m = rekt_fast(clip, left=left, right=right, top=top, bottom=bottom,
@@ -208,3 +215,27 @@ def ds(clip, size=720, sar=16 / 9):
         w = round((width * ar) / 2) * 2
         h = round((height * (1 / ar)) / 2) * 2
     return core.resize.Spline36(clip, w, h)
+
+
+'''
+Blatently stolen from Frechdachs's gist.
+'''
+
+
+def fag3kdb(clp, thry=40, thrc=None, radiusy=12, radiusc=8, grainy=15, grainc=0, dynamic_grainy=False,
+            dynamic_grainc=False, mask_thr=2, mask_radius=2, keep_tv_range=True):
+    import fvsfunc as fvf
+    if thrc is None:
+        thrc = thry // 2
+    clp = fvf.Depth(clp, bits=16)
+    mask = fvf.GradFun3(clp, thr_det=mask_thr, mask=mask_radius, bits=16, debug=1)
+    U = core.std.ShufflePlanes(clp, 1, vs.GRAY)
+    U = U.f3kdb.Deband(range=radiusc, y=thrc, cb=0, cr=0, grainy=grainc, grainc=0,
+                       dynamic_grain=dynamic_grainc, keep_tv_range=False, output_depth=16)
+    V = core.std.ShufflePlanes(clp, 2, vs.GRAY)
+    V = V.f3kdb.Deband(range=radiusc, y=thrc, cb=0, cr=0, grainy=grainc, grainc=0,
+                       dynamic_grain=dynamic_grainc, keep_tv_range=False, output_depth=16)
+    filtered = core.std.ShufflePlanes([clp, U, V], [0, 0, 0], vs.YUV)
+    filtered = filtered.f3kdb.Deband(range=radiusy, y=thry, cb=0, cr=0, grainy=grainy, grainc=0,
+                                     dynamic_grain=dynamic_grainy, keep_tv_range=keep_tv_range, output_depth=16)
+    return core.std.MaskedMerge(filtered, clp, mask)
