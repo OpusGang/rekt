@@ -22,6 +22,10 @@ def f(m):
 
 Anti-aliasing alias that applies TAA to rekt_fast.  Default aatype is 3 with no mask, preaa, postaa, and strength 0.
 
+## rektdb
+
+De-banding alias that applies f3kdb via rekt_fast.  Uses kageru's retinex_edgemask by default.
+
 ## black_detect
 
 Tool to highlight black lines on borders and place them in the middle. Such lines should then create a straight line or even a cross if horizontal and vertical lines line up accordingly.
