@@ -198,6 +198,30 @@ def black_detect(clip, thresh=None, fix=False, left=0, right=0, top=0, bottom=0)
 
 
 '''
+Inspired by a pastebin function called imax_fixer
+'''
+
+
+def black_fix(clip, left=0, top=0, right=0, bottom=0):
+    y = black_prep(core.std.ShufflePlanes(clip, 0, vs.GRAY))
+    y_filled = black_prep(core.fb.FillBorders(y, left=left, top=top, right=right, bottom=bottom))
+    lim = str({8: 16, 10: 64, 16: 4096}[bit_depth])
+    __eval__ = core.std.Expr(y, y_filled, "x y {0} - <".format(lim))
+    if __eval__ == True:
+        return core.fb.FillBorders(clip, left=left, top=top, right=right, bottom=bottom)
+    elif __eval__ == False:
+        return clip
+    else:
+        return
+
+
+def black_prep(clip, n):
+    current_frame = clip.get_frame(n)
+    y_plane = current_frame.get_read_array(0)
+    y_memory = memoryview(y_plane)
+
+
+'''
 Stupid downscaling that should automatically calculate the correct width and height.
 '''
 
