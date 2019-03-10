@@ -50,10 +50,10 @@ def rekt_fast(src, fun=lambda x: x, left=0, top=0, right=0, bottom=0):
 
 
 def rektaa(clip, left=0, top=0, right=0, bottom=0, aatype=3, aatypeu=None, aatypev=None, preaa=0, strength=0, cycle=0,
-    '''Anti-aliasing alias for fast_rekt with vsTAAmbk.'''
            mtype=None, masktype=None, mclip=None,
            mthr=None, mthr2=None, mlthresh=None, mpand=(1, 0), txtmask=0, txtfade=0, thin=0, dark=0.0, sharp=0,
-           aarepair=0, postaa=None, src=None, stabilize=0, down8=True, showmask=0, opencl=True, opencl_device=0):
+           aarepair=0, postaa=None, src=None, stabilize=0, down8=True, showmask=0, opencl=False, opencl_device=0):
+    '''Anti-aliasing alias for fast_rekt with vsTAAmbk.'''
     import vsTAAmbk as taa
     if masktype != None:
         return rekt_fast(clip, left=left, right=right, top=top, bottom=bottom,
@@ -90,7 +90,7 @@ def rektdb(clip, left=0, top=0, right=0, bottom=0,
            blur_first=True, dynamic_grain=True,
            opt=-1, dither_algo=3, keep_tv_range=False,
            output_depth=16, random_algo_ref=1, random_param_ref=1, random_param_grain=1,
-           preset=None, mask='retinex', thry=40, thrc=None, radiusy=12, radiusc=8, mask_thr=2, mask_radius):
+           preset=None, mask='retinex', thry=40, thrc=None, radiusy=12, radiusc=8, mask_thr=2, mask_radius=2):
     '''De-banding alias.  Can use a lambda mask.  Default is retinex_edgemask from kagefunc.  Requires fvsfunc, fag3kdb, and kagefunc.'''
     if mask == 'retinex':
         import fvsfunc as fvf
