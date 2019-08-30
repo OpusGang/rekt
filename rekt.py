@@ -11,6 +11,8 @@ def rekt(src, fix, left=0, top=0, right=0, bottom=0):
         r = core.std.Crop(src, left=src.width - right) if right > 0 else 0
         params = [x for x in [l, m, r] if x != 0]
         m = core.std.StackHorizontal(params)
+    else:
+        m = fix
     if top > 0 or bottom > 0:
         t = core.std.Crop(src, bottom=src.height - top) if top > 0 else 0
         m = core.std.Crop(m, bottom=bottom, top=top)
