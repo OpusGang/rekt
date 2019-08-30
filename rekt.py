@@ -32,10 +32,10 @@ def rekt_fast(src, fun=lambda x: x, left=0, top=0, right=0, bottom=0):
     Results in the following function being applied to only the masked rectangle:
     
     def f(m):
-    	return taa.TAAmbk(m, aatype=3, preaa=-1, strength=-1, mtype=2)'''
-    m = core.std.Crop(src, left=left, right=right, bottom=bottom, top=top)
+        return taa.TAAmbk(m, aatype=3, preaa=-1, strength=-1, mtype=2)'''
+    m = core.std.Crop(src, left=left, right=right)
     if left > 0 or right > 0:
-        m = fun(m).std.AddBorders(top=top, bottom=bottom)
+        m = fun(m.std.Crop(top=top, bottom=bottom)).std.AddBorders(top=top, bottom=bottom)
         l = core.std.Crop(src, right=src.width - left) if left > 0 else 0
         r = core.std.Crop(src, left=src.width - right) if right > 0 else 0
         params = [x for x in [l, m, r] if x != 0]
