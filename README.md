@@ -22,3 +22,7 @@ Anti-aliasing alias that applies TAA to rekt_fast.  Default aatype is 3 with no 
 
 De-banding alias that applies f3kdb via rekt_fast.  Uses kageru's retinex_edgemask by default.
 
+## rektlvl(s)
+
+A faster version of havsfunc's FixBrightness(Protect2). It also features the option to process multiple rows or columns in one line.
+The main function that does all the processing is rektlvl, while rektlvls is a simple wrapper to call rektlvl multiple times.
