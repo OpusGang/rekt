@@ -19,10 +19,6 @@ def f(m):
 Anti-aliasing alias that applies TAA to rekt_fast.  Default aatype is 3 with no mask, preaa, postaa, and strength 0.
 Parameters are clip, location (left, top, right, bottom), and TAA parameters.
 
-## rektdb
-
-De-banding alias that applies f3kdb via rekt_fast.  Uses kageru's retinex_edgemask by default.
-
 ## rektlvl(s)
 
 A faster version of havsfunc's FixBrightness(Protect2). It also features the option to process multiple rows or columns in one line.
