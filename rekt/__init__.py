@@ -1,4 +1,4 @@
-from rekt.rekt import *
-from rekt.rekt_fast import *
-from rekt.rektaa import *
-from rekt.rektlvls import *
+from rekt.rekt import rekt
+from rekt.rekt_fast import rekt_fast
+from rekt.rektaa import rektaa
+from rekt.rektlvls import rektlvl, rektlvls
