@@ -1,14 +1,18 @@
 import vapoursynth as vs
 from vapoursynth import core
+from rekt import rekt_fast
 
-def rektlvl(c, num, adj_val, type='row', prot_val=20, min=16, max=235):
+
+def rektlvl(c, num, adj_val, type='row', prot_val=[16, 20], min=16, max=235):
     '''
     A rekt_fast version of havsfunc's FixBrightnessProtect2/FixBrightness.
     :param c: Clip to be processed.
     :param num: Row or column number.
     :param adj_val: Adjustment value; negative numbers darken, while positive numbers brighten. Between -100 and 100.
     :param type: Whether a row or a column is to be processed
-    :param prot_val: Values above 255 - prot_val will not be processed. If 0, this will work like FixBrightness.
+    :param prot_val: If None, this will work like FixBrightness. If an int, values above 255 - prot_val will not be
+                     processed. If list, first int is value below which no processing takes place, second int is same as
+                     no list.
     :return: Clip with first plane's values adjusted by adj_val.
     '''
     from vsutil import get_y, plane
@@ -25,8 +29,13 @@ def rektlvl(c, num, adj_val, type='row', prot_val=20, min=16, max=235):
         c = get_y(c)
     else:
         c_orig = None
-    if prot_val != 0:
-        expr = f'x {scale(16, peak)} - {100 - adj_val} / 100 * {scale(16, peak)} + x {scale(255 - prot_val, peak)} - -10 / 0 max 1 min * x x {scale(245 - prot_val, peak)} - 10 / 0 max 1 min * +'
+    if prot_val or prot_val == 0:
+        if prot_val == 0:
+            expr = f'x {scale(16, peak)} - {100 - adj_val} / 100 * {scale(16, peak)} +'
+        elif isinstance(prot_val, int):
+            expr = f'x {scale(16, peak)} - {100 - adj_val} / 100 * {scale(16, peak)} + x {scale(255 - prot_val, peak)} - -10 / 0 max 1 min * x x {scale(245 - prot_val, peak)} - 10 / 0 max 1 min * +'
+        else:
+            expr = f'x {scale(128, peak)} > x {scale(16, peak)} - {100 - adj_val} / 100 * {scale(16, peak)} + x {scale(255 - prot_val[1], peak)} - -10 / 0 max 1 min * x x {scale(245 - prot_val[1], peak)} - 10 / 0 max 1 min * + x {scale(16, peak)} - {100 - adj_val} / 100 * {scale(16, peak)} + {scale(prot_val[0], peak)} x - -10 / 0 max 1 min * x {scale(prot_val[0], peak)} 10 + x - 10 / 0 max 1 min * + ?'
         last = lambda x: core.std.Expr(x, expr=expr)
     else:
         if adj_val < 0:
@@ -50,7 +59,7 @@ def rektlvl(c, num, adj_val, type='row', prot_val=20, min=16, max=235):
     return last
 
 
-def rektlvls(clip, rownum=None, rowval=None, colnum=None, colval=None, prot_val=20, min=16, max=235):
+def rektlvls(clip, rownum=None, rowval=None, colnum=None, colval=None, prot_val=[16, 20], min=16, max=235):
     '''
     Wrapper around rektlvl: a rekt_fast version of havsfunc's FixBrightnessProtect2.
     :param clip: Clip to be processed.
@@ -58,7 +67,9 @@ def rektlvls(clip, rownum=None, rowval=None, colnum=None, colval=None, prot_val=
     :param rowval: Row adjustment value. Negatives darken, positives brighten. Values can be between -100 and 100.
     :param colnum: Column(s) to be processed.
     :param colval: Column adjustment value. Negatives darken, positives brighten. Values can be between -100 and 100.
-    :param prot_val: Values above 255 - prot_val will not be processed. If 0, this will work like FixBrightness.
+    :param prot_val: If None, this will work like FixBrightness. If an int, values above 255 - prot_val will not be
+                     processed. If list, first int is value below which no processing takes place, second int is same as
+                     no list.
     :return: Clip with first plane's values adjusted by adj_val.
     '''
     if rownum is not None:

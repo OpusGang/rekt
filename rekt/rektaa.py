@@ -1,5 +1,6 @@
 import vapoursynth as vs
 from vapoursynth import core
+from rekt import rekt_fast
 
 def rektaa(clip, left=0, top=0, right=0, bottom=0, aatype=3, aatypeu=None, aatypev=None, preaa=0, strength=0, cycle=0,
            mtype=None, masktype=None, mclip=None,
