@@ -18,7 +18,7 @@ def rektlvl(c, num, adj_val, type='row', prot_val=[16, 20], min=16, max=235):
     from vsutil import get_y, plane
     from havsfunc import scale, cround
     core = vs.get_core()
-    if (adj_val > 100 or adj_val < -100) and prot_val != 0:
+    if (adj_val > 100 or adj_val < -100) and prot_val:
         raise ValueError("adj_val must be between -100 and 100!")
     if c.format.color_family == vs.RGB:
         raise TypeError("RGB color family is not supported by rektlvls.")
@@ -30,12 +30,16 @@ def rektlvl(c, num, adj_val, type='row', prot_val=[16, 20], min=16, max=235):
     else:
         c_orig = None
     if prot_val or prot_val == 0:
-        if prot_val == 0:
-            expr = f'x {scale(16, peak)} - {100 - adj_val} / 100 * {scale(16, peak)} +'
-        elif isinstance(prot_val, int):
-            expr = f'x {scale(16, peak)} - {100 - adj_val} / 100 * {scale(16, peak)} + x {scale(255 - prot_val, peak)} - -10 / 0 max 1 min * x x {scale(245 - prot_val, peak)} - 10 / 0 max 1 min * +'
+        if adj_val > 0:
+            expr = f'x {scale(16, peak)} - 0 <= {scale(16, peak)} {scale(235, peak)} {scale(adj_val * 2.19, peak)} - {scale(16, peak)} - 0 <= 0.01 {scale(235, peak)} {scale(adj_val * 2.19, peak)} - {scale(16, peak)} - ? / {scale(219, peak)} * x {scale(16, peak)} - {scale(235, peak)} {scale(adj_val * 2.19, peak)} - {scale(16, peak)} - 0 <= 0.01 {scale(235, peak)} {scale(adj_val * 2.19, peak)} - {scale(16, peak)} - ? / {scale(219, peak)} * {scale(16, peak)} + ?'
+        elif adj_val < 0:
+            expr = f'x {scale(16, peak)} - 0 <= {scale(16, peak)} {scale(219, peak)} / {scale(235, peak)} {scale(adj_val * 2.19, peak)} + {scale(16, peak)} - * x {scale(16, peak)} - {scale(219, peak)} / {scale(235, peak)} {scale(adj_val * 2.19, peak)} + {scale(16, peak)} - * {scale(16, peak)} + ?'
         else:
-            expr = f'x {scale(128, peak)} > x {scale(16, peak)} - {100 - adj_val} / 100 * {scale(16, peak)} + x {scale(255 - prot_val[1], peak)} - -10 / 0 max 1 min * x x {scale(245 - prot_val[1], peak)} - 10 / 0 max 1 min * + x {scale(16, peak)} - {100 - adj_val} / 100 * {scale(16, peak)} + {scale(prot_val[0], peak)} x - -10 / 0 max 1 min * x {scale(prot_val[0], peak)} 10 + x - 10 / 0 max 1 min * + ?'
+            return c_orig
+        if isinstance(prot_val, int):
+            expr = expr + f' x {scale(255 - prot_val, peak)} - -10 / 0 max 1 min * x x {scale(245 - prot_val, peak)} - 10 / 0 max 1 min * +'
+        else:
+            expr = expr + f' x {scale(255 - prot_val[1], peak)} - -10 / 0 max 1 min * x x {scale(245 - prot_val[1], peak)} 10 - - 10 / 0 max 1 min * + {scale(prot_val[0], peak)} x - -10 / 0 max 1 min * x {scale(prot_val[0], peak)} 10 + x - 10 / 0 max 1 min * +'
         last = lambda x: core.std.Expr(x, expr=expr)
     else:
         if adj_val < 0:
