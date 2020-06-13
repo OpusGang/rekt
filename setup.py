@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='rekt',
-      version='r32',
+      version='r34',
       description='VapourSynth wrapper for Cropping and Stacking clips.',
       long_description='README.md',
       url='https://gitlab.com/Ututu/rekt',
