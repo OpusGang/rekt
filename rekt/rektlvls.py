@@ -37,9 +37,9 @@ def rektlvl(c, num, adj_val, type='row', prot_val=[16, 20], min=16, max=235):
         else:
             return c_orig
         if isinstance(prot_val, int):
-            expr = expr + f' x {scale(255 - prot_val, peak)} - -10 / 0 max 1 min * x x {scale(245 - prot_val, peak)} - 10 / 0 max 1 min * +'
+            expr = expr + f' x {scale(255 - prot_val, peak)} - -{scale(10, peak)} / 0 max 1 min * x x {scale(245 - prot_val, peak)} - {scale(10, peak)} / 0 max 1 min * +'
         else:
-            expr = expr + f' x {scale(255 - prot_val[1], peak)} - -10 / 0 max 1 min * x x {scale(245 - prot_val[1], peak)} 10 - - 10 / 0 max 1 min * + {scale(prot_val[0], peak)} x - -10 / 0 max 1 min * x {scale(prot_val[0], peak)} 10 + x - 10 / 0 max 1 min * +'
+            expr = expr + f' x {scale(prot_val[1], peak)} - -{scale(10, peak)} / 0 max 1 min * x x {scale(prot_val[1], peak)} {scale(10, peak)} - - {scale(10, peak)} / 0 max 1 min * + {scale(prot_val[0], peak)} x - -{scale(10, peak)} / 0 max 1 min * x {scale(prot_val[0], peak)} {scale(10, peak)} + x - {scale(10, peak)} / 0 max 1 min * +'
         last = lambda x: core.std.Expr(x, expr=expr)
     else:
         if adj_val < 0:
