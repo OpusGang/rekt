@@ -3,7 +3,7 @@ from vapoursynth import core
 from rekt import rekt_fast
 
 
-def rektlvl(c, num, adj_val, type='row', prot_val=[16, 20], min=16, max=235):
+def rektlvl(c, num, adj_val, type='row', prot_val=[16, 235], min=16, max=235):
     '''
     A rekt_fast version of havsfunc's FixBrightnessProtect2/FixBrightness.
     :param c: Clip to be processed.
@@ -16,7 +16,10 @@ def rektlvl(c, num, adj_val, type='row', prot_val=[16, 20], min=16, max=235):
     :return: Clip with first plane's values adjusted by adj_val.
     '''
     from vsutil import get_y, plane
-    from havsfunc import scale, cround
+    try:
+        from havsfunc import scale, cround
+    except ModuleNotFoundError:
+        from awsmfunc import scale
     core = vs.get_core()
     if (adj_val > 100 or adj_val < -100) and prot_val:
         raise ValueError("adj_val must be between -100 and 100!")
@@ -63,7 +66,7 @@ def rektlvl(c, num, adj_val, type='row', prot_val=[16, 20], min=16, max=235):
     return last
 
 
-def rektlvls(clip, rownum=None, rowval=None, colnum=None, colval=None, prot_val=[16, 20], min=16, max=235):
+def rektlvls(clip, rownum=None, rowval=None, colnum=None, colval=None, prot_val=[16, 235], min=16, max=235):
     '''
     Wrapper around rektlvl: a rekt_fast version of havsfunc's FixBrightnessProtect2.
     :param clip: Clip to be processed.
