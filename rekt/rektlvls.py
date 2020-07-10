@@ -15,17 +15,13 @@ def rektlvl(c, num, adj_val, type='row', prot_val=[16, 235], min=16, max=235):
                      no list.
     :return: Clip with first plane's values adjusted by adj_val.
     '''
-    from vsutil import get_y, plane
-    try:
-        from havsfunc import scale, cround
-    except ModuleNotFoundError:
-        from awsmfunc import scale
-    core = vs.get_core()
+    from vsutil import get_y, plane, scale_value
+    core = vs.core
     if (adj_val > 100 or adj_val < -100) and prot_val:
         raise ValueError("adj_val must be between -100 and 100!")
     if c.format.color_family == vs.RGB:
         raise TypeError("RGB color family is not supported by rektlvls.")
-    peak = (1 << c.format.bits_per_sample) - 1
+    bits = c.format.bits_per_sample
 
     if c.format.color_family != vs.GRAY:
         c_orig = c
@@ -34,23 +30,23 @@ def rektlvl(c, num, adj_val, type='row', prot_val=[16, 235], min=16, max=235):
         c_orig = None
     if prot_val or prot_val == 0:
         if adj_val > 0:
-            expr = f'x {scale(16, peak)} - 0 <= {scale(16, peak)} {scale(235, peak)} {scale(adj_val * 2.19, peak)} - {scale(16, peak)} - 0 <= 0.01 {scale(235, peak)} {scale(adj_val * 2.19, peak)} - {scale(16, peak)} - ? / {scale(219, peak)} * x {scale(16, peak)} - {scale(235, peak)} {scale(adj_val * 2.19, peak)} - {scale(16, peak)} - 0 <= 0.01 {scale(235, peak)} {scale(adj_val * 2.19, peak)} - {scale(16, peak)} - ? / {scale(219, peak)} * {scale(16, peak)} + ?'
+            expr = f'x {scale_value(16, 8, bits)} - 0 <= {scale_value(16, 8, bits)} {scale_value(235, 8, bits)} {scale_value(adj_val * 2.19, 8, bits)} - {scale_value(16, 8, bits)} - 0 <= 0.01 {scale_value(235, 8, bits)} {scale_value(adj_val * 2.19, 8, bits)} - {scale_value(16, 8, bits)} - ? / {scale_value(219, 8, bits)} * x {scale_value(16, 8, bits)} - {scale_value(235, 8, bits)} {scale_value(adj_val * 2.19, 8, bits)} - {scale_value(16, 8, bits)} - 0 <= 0.01 {scale_value(235, 8, bits)} {scale_value(adj_val * 2.19, 8, bits)} - {scale_value(16, 8, bits)} - ? / {scale_value(219, 8, bits)} * {scale_value(16, 8, bits)} + ?'
         elif adj_val < 0:
-            expr = f'x {scale(16, peak)} - 0 <= {scale(16, peak)} {scale(219, peak)} / {scale(235, peak)} {scale(adj_val * 2.19, peak)} + {scale(16, peak)} - * x {scale(16, peak)} - {scale(219, peak)} / {scale(235, peak)} {scale(adj_val * 2.19, peak)} + {scale(16, peak)} - * {scale(16, peak)} + ?'
+            expr = f'x {scale_value(16, 8, bits)} - 0 <= {scale_value(16, 8, bits)} {scale_value(219, 8, bits)} / {scale_value(235, 8, bits)} {scale_value(adj_val * 2.19, 8, bits)} + {scale_value(16, 8, bits)} - * x {scale_value(16, 8, bits)} - {scale_value(219, 8, bits)} / {scale_value(235, 8, bits)} {scale_value(adj_val * 2.19, 8, bits)} + {scale_value(16, 8, bits)} - * {scale_value(16, 8, bits)} + ?'
         else:
             return c_orig
         if isinstance(prot_val, int):
-            expr = expr + f' x {scale(255 - prot_val, peak)} - -{scale(10, peak)} / 0 max 1 min * x x {scale(245 - prot_val, peak)} - {scale(10, peak)} / 0 max 1 min * +'
+            expr = expr + f' x {scale_value(255 - prot_val, 8, bits)} - -{scale_value(10, 8, bits)} / 0 max 1 min * x x {scale_value(245 - prot_val, 8, bits)} - {scale_value(10, 8, bits)} / 0 max 1 min * +'
         else:
-            expr = expr + f' x {scale(prot_val[1], peak)} - -{scale(10, peak)} / 0 max 1 min * x x {scale(prot_val[1], peak)} {scale(10, peak)} - - {scale(10, peak)} / 0 max 1 min * + {scale(prot_val[0], peak)} x - -{scale(10, peak)} / 0 max 1 min * x {scale(prot_val[0], peak)} {scale(10, peak)} + x - {scale(10, peak)} / 0 max 1 min * +'
+            expr = expr + f' x {scale_value(prot_val[1], 8, bits)} - -{scale_value(10, 8, bits)} / 0 max 1 min * x x {scale_value(prot_val[1], 8, bits)} {scale_value(10, 8, bits)} - - {scale_value(10, 8, bits)} / 0 max 1 min * + {scale_value(prot_val[0], 8, bits)} x - -{scale_value(10, 8, bits)} / 0 max 1 min * x {scale_value(prot_val[0], 8, bits)} {scale_value(10, 8, bits)} + x - {scale_value(10, 8, bits)} / 0 max 1 min * +'
         last = lambda x: core.std.Expr(x, expr=expr)
     else:
         if adj_val < 0:
-            last = lambda x: core.std.Levels(x, min_in=scale(min, peak), max_in=scale(max, peak),
-                                             min_out=scale(min, peak), max_out=scale(max + adj_val, peak))
+            last = lambda x: core.std.Levels(x, min_in=scale_value(min, 8, bits), max_in=scale_value(max, 8, bits),
+                                             min_out=scale_value(min, 8, bits), max_out=scale_value(max + adj_val, 8, bits))
         elif adj_val > 0:
-            last = lambda x: core.std.Levels(x, min_in=scale(min, peak), max_in=scale(max - adj_val, peak),
-                                             min_out=scale(min, peak), max_out=scale(max, peak))
+            last = lambda x: core.std.Levels(x, min_in=scale_value(min, 8, bits), max_in=scale_value(max - adj_val, 8, bits),
+                                             min_out=scale_value(min, 8, bits), max_out=scale_value(max, 8, bits))
         else:
             last = lambda x: x
     if type is 'row':
