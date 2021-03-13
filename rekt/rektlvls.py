@@ -28,7 +28,7 @@ def rektlvl(c, num, adj_val, type='row', prot_val=[16, 235], min=16, max=235):
         c = get_y(c)
     else:
         c_orig = None
-    if prot_val or prot_val == 0:
+    if prot_val is not None and prot_val is not False:
         if adj_val > 0:
             expr = f'x {scale_value(16, 8, bits)} - 0 <= {scale_value(16, 8, bits)} {scale_value(235, 8, bits)} {scale_value(adj_val * 2.19, 8, bits)} - {scale_value(16, 8, bits)} - 0 <= 0.01 {scale_value(235, 8, bits)} {scale_value(adj_val * 2.19, 8, bits)} - {scale_value(16, 8, bits)} - ? / {scale_value(219, 8, bits)} * x {scale_value(16, 8, bits)} - {scale_value(235, 8, bits)} {scale_value(adj_val * 2.19, 8, bits)} - {scale_value(16, 8, bits)} - 0 <= 0.01 {scale_value(235, 8, bits)} {scale_value(adj_val * 2.19, 8, bits)} - {scale_value(16, 8, bits)} - ? / {scale_value(219, 8, bits)} * {scale_value(16, 8, bits)} + ?'
         elif adj_val < 0:
@@ -41,6 +41,7 @@ def rektlvl(c, num, adj_val, type='row', prot_val=[16, 235], min=16, max=235):
             expr = expr + f' x {scale_value(prot_val[1], 8, bits)} - -{scale_value(10, 8, bits)} / 0 max 1 min * x x {scale_value(prot_val[1], 8, bits)} {scale_value(10, 8, bits)} - - {scale_value(10, 8, bits)} / 0 max 1 min * + {scale_value(prot_val[0], 8, bits)} x - -{scale_value(10, 8, bits)} / 0 max 1 min * x {scale_value(prot_val[0], 8, bits)} {scale_value(10, 8, bits)} + x - {scale_value(10, 8, bits)} / 0 max 1 min * +'
         last = lambda x: core.std.Expr(x, expr=expr)
     else:
+        adj_val = adj_val * (max - min) / 100
         if adj_val < 0:
             last = lambda x: core.std.Levels(x, min_in=scale_value(min, 8, bits), max_in=scale_value(max, 8, bits),
                                              min_out=scale_value(min, 8, bits), max_out=scale_value(max + adj_val, 8, bits))
@@ -70,7 +71,7 @@ def rektlvls(clip, rownum=None, rowval=None, colnum=None, colval=None, prot_val=
     :param rowval: Row adjustment value. Negatives darken, positives brighten. Values can be between -100 and 100.
     :param colnum: Column(s) to be processed.
     :param colval: Column adjustment value. Negatives darken, positives brighten. Values can be between -100 and 100.
-    :param prot_val: If None, this will work like FixBrightness. If an int, values above 255 - prot_val will not be
+    :param prot_val: If None or False, this will work like FixBrightness. If an int, values above 255 - prot_val will not be
                      processed. If list, first int is value below which no processing takes place, second int is same as
                      no list.
     :return: Clip with first plane's values adjusted by adj_val.
@@ -81,6 +82,8 @@ def rektlvls(clip, rownum=None, rowval=None, colnum=None, colval=None, prot_val=
         if isinstance(rowval, int):
             rowval = [rowval]
         for _ in range(len(rownum)):
+            if rownum[_] < 0:
+                rownum[_] = clip.height + rownum[_]
             clip = rektlvl(clip, rownum[_], rowval[_], type='row', prot_val=prot_val, min=min, max=max)
     if colnum is not None:
         if isinstance(colnum, int):
@@ -88,5 +91,7 @@ def rektlvls(clip, rownum=None, rowval=None, colnum=None, colval=None, prot_val=
         if isinstance(colval, int):
             colval = [colval]
         for _ in range(len(colnum)):
+            if colnum[_] < 0:
+                colnum[_] = clip.width + colnum[_]
             clip = rektlvl(clip, colnum[_], colval[_], type='column', prot_val=prot_val, min=min, max=max)
     return clip
