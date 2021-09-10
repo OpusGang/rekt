@@ -22,16 +22,19 @@ Parameters are clip, location (left, top, right, bottom), and TAA parameters.
 ## rektlvl(s)
 
 A faster version of havsfunc's FixBrightness(Protect2). It also features the option to process multiple rows or columns in one line.
-The main function that does all the processing is rektlvl, while rektlvls is a simple wrapper to call rektlvl multiple times.
 ```py
     '''
-    Wrapper around rektlvl: a rekt_fast version of havsfunc's FixBrightnessProtect2.
+    More or less a wrapper around std.Levels with rekt_fast for darkening or brightening lines, usually on frame edges.
     :param clip: Clip to be processed.
     :param rownum: Row(s) to be processed.
     :param rowval: Row adjustment value. Negatives darken, positives brighten. Values can be between -100 and 100.
     :param colnum: Column(s) to be processed.
     :param colval: Column adjustment value. Negatives darken, positives brighten. Values can be between -100 and 100.
-    :param prot_val: Values above 255 - prot_val will not be processed. If 0, this will work like FixBrightness.
+    :param prot_val: If None or False, this will work like FixBrightness. If an int, only a top protection is used.
+                     Specify a list and the first value will be the bottom protect, while the second the top protect.
+                     Values within 10 from the protect will be scaled linearly, while values past the protect aren't touched.
+                     The AviSynth script this is from:
+                     https://github.com/Asd-g/AviSynthPlus-Scripts/blob/master/FixBrightnessProtect3.avsi
     :return: Clip with first plane's values adjusted by adj_val.
     '''
 ```
