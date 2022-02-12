@@ -18,7 +18,6 @@ def _rektlvl(c, num, adj_val, alignment='row', prot_val=[16, 235], min_val=16, m
     min_val = scale_value(min_val, 8, bits)
     max_val = scale_value(max_val, 8, bits)
     diff_val = max_val - min_val
-    adj_val = scale_value(adj_val * 2.19, 8, bits)
     ten = scale_value(10, 8, bits)
 
     if c.format.color_family != vs.GRAY:
@@ -28,6 +27,7 @@ def _rektlvl(c, num, adj_val, alignment='row', prot_val=[16, 235], min_val=16, m
         c_orig = None
 
     if prot_val:
+        adj_val = scale_value(adj_val * 2.19, 8, bits)
         if adj_val > 0:
             expr = f'x {min_val} - 0 <= {min_val} {max_val} {adj_val} - {min_val} - 0 <= 0.01 {max_val} {adj_val} - {min_val} - ? / {diff_val} * x {min_val} - {max_val} {adj_val} - {min_val} - 0 <= 0.01 {max_val} {adj_val} - {min_val} - ? / {diff_val} * {min_val} + ?'
         elif adj_val < 0:
