@@ -1,23 +1,20 @@
 ## rekt
 
-Creates a rectangular "mask" for a fix to be applied to.
+Simple cropping and stacking to merge two clips as opposed to using a square mask.
 
 ## rekt_fast
 
-Creates a rectangular "mask" in which a fix is applied to only the masked area.  This vastly speeds up filters like anti-aliasing and scaling.
-This wrapper works with a lambda function, which is applied to the "m" clip later on:
-```python
-rekt_fast(src, fun = lambda m: taa.TAAmbk(m, aatype=3, preaa=-1, strength=0.5, mtype=2), left=2, right=8, top=10, bottom=2)
+Same as `rekt` with the exception that you can pass a function to be applied to the cropped clip.
+This can be used to vastly speed up filters that don't require the entire image:
+
+```py
+clip = rekt_fast(clip, lambda c: c.std.Invert(), left=10, top=10, right=10, bottom=10)
 ```
-Results in the following function being applied to only the masked rectangle:
-```python
-def f(m):
-    return taa.TAAmbk(m, aatype=3, preaa=-1, strength=0.5, mtype=2)
-```
+
 ## rektaa
 
-Anti-aliasing alias that applies TAA to rekt_fast.  Default aatype is 3 with no mask, preaa, postaa, and strength 0.
-Parameters are clip, location (left, top, right, bottom), and TAA parameters.
+Wrapper for `rekt_fast` with TAA.
+Default `aamode` is nnedi3.
 
 ## rektlvl(s)
 
