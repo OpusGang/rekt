@@ -35,3 +35,6 @@ A faster version of havsfunc's FixBrightness(Protect2). It also features the opt
     :return: Clip with first plane's values adjusted by adj_val.
     '''
 ```
+
+### Contact
+- **IRC Channel**: `#OpusGang` on `irc.libera.chat`
