@@ -1,6 +1,6 @@
 import vapoursynth as vs
 from vapoursynth import core
-from rekt import rekt_fast
+from .rekt_fast import rekt_fast
 
 
 def _rektlvl(c, num, adj_val, alignment='row', prot_val=[16, 235], min_val=16, max_val=235):
@@ -76,7 +76,7 @@ def rektlvls(clip, rownum=None, rowval=None, colnum=None, colval=None, prot_val=
                      https://github.com/Asd-g/AviSynthPlus-Scripts/blob/master/FixBrightnessProtect3.avsi
     :return: Clip with first plane's values adjusted by adj_val.
     '''
-    if rownum:
+    if rownum is not None:
         if isinstance(rownum, int):
             rownum = [rownum]
         if isinstance(rowval, int):
@@ -85,7 +85,7 @@ def rektlvls(clip, rownum=None, rowval=None, colnum=None, colval=None, prot_val=
             if rownum[_] < 0:
                 rownum[_] = clip.height + rownum[_]
             clip = _rektlvl(clip, rownum[_], rowval[_], alignment='row', prot_val=prot_val, min_val=min_val, max_val=max_val)
-    if colnum:
+    if colnum is not None:
         if isinstance(colnum, int):
             colnum = [colnum]
         if isinstance(colval, int):
