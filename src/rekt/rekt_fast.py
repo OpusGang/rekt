@@ -1,6 +1,7 @@
 import vapoursynth as vs
 from vapoursynth import core
 
+
 def rekt_fast(src, fun=lambda x: x, left=0, top=0, right=0, bottom=0):
     '''Creates a rectangular "mask" in which a fix is applied to only the masked area.
     This vastly speeds up filters like anti-aliasing and scaling.'''

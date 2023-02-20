@@ -44,9 +44,11 @@ def _rektlvl(c, num, adj_val, alignment='row', prot_val=[16, 235], min_val=16, m
     else:
         adj_val = adj_val * (max_val - min_val) / 100
         if adj_val < 0:
-            last = lambda x: core.std.Levels(x, min_in=min_val, max_in=max_val, min_out=min_val, max_out=max_val + adj_val)
+            last = lambda x: core.std.Levels(
+                x, min_in=min_val, max_in=max_val, min_out=min_val, max_out=max_val + adj_val)
         elif adj_val > 0:
-            last = lambda x: core.std.Levels(x, min_in=min_val, max_in=max_val - adj_val, min_out=min_val, max_out=max_val)
+            last = lambda x: core.std.Levels(
+                x, min_in=min_val, max_in=max_val - adj_val, min_out=min_val, max_out=max_val)
 
     if alignment == 'row':
         last = rekt_fast(c, last, bottom=c.height - num - 1, top=num)
@@ -84,7 +86,13 @@ def rektlvls(clip, rownum=None, rowval=None, colnum=None, colval=None, prot_val=
         for _ in range(len(rownum)):
             if rownum[_] < 0:
                 rownum[_] = clip.height + rownum[_]
-            clip = _rektlvl(clip, rownum[_], rowval[_], alignment='row', prot_val=prot_val, min_val=min_val, max_val=max_val)
+            clip = _rektlvl(clip,
+                            rownum[_],
+                            rowval[_],
+                            alignment='row',
+                            prot_val=prot_val,
+                            min_val=min_val,
+                            max_val=max_val)
     if colnum is not None:
         if isinstance(colnum, int):
             colnum = [colnum]
@@ -93,5 +101,11 @@ def rektlvls(clip, rownum=None, rowval=None, colnum=None, colval=None, prot_val=
         for _ in range(len(colnum)):
             if colnum[_] < 0:
                 colnum[_] = clip.width + colnum[_]
-            clip = _rektlvl(clip, colnum[_], colval[_], alignment='column', prot_val=prot_val, min_val=min_val, max_val=max_val)
+            clip = _rektlvl(clip,
+                            colnum[_],
+                            colval[_],
+                            alignment='column',
+                            prot_val=prot_val,
+                            min_val=min_val,
+                            max_val=max_val)
     return clip

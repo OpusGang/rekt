@@ -2,6 +2,7 @@ import vapoursynth as vs
 from vapoursynth import core
 from .rekt_fast import rekt_fast
 
+
 def rektaa(clip, left=0, top=0, right=0, bottom=0, aatype=3, aatypeu=None, aatypev=None, preaa=0, strength=0, cycle=0,
            mtype=None, mclip=None, mthr=None, mthr2=None, mlthresh=None, mpand=(1, 0), txtmask=0, txtfade=0, thin=0,
            dark=0.0, sharp=0, aarepair=0, postaa=None, src=None, stabilize=0, down8=True, showmask=0, opencl=False, 

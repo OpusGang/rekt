@@ -1,0 +1,6 @@
+src/vs_rekt.egg-info/
+build/
+dist/
+.vscode
+.mypy_cache
+/src/rekt/__pycache__

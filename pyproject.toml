@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools >= 61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vs-rekt"
+description = "VapourSynth wrapper for Cropping and Stacking clips."
+version = "1.0.0"
+license = {text = "MIT"}
+authors = [
+  { name = "OpusGang" },
+]
+readme = "README.md"
+
+requires-python = ">=3.6"
+
+dependencies = [
+  "VapourSynth >= 57",
+  "vsutil >= 0.7.0"
+]
+
+[project.urls]
+Homepage = "https://github.com/OpusGang/rekt"
+
+[project.optional-dependencies]
+dev = ["pylint", "toml", "yapf"]
