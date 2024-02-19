@@ -1,12 +1,13 @@
 import vapoursynth as vs
-from vapoursynth import core
+
 from .rekt_fast import rekt_fast
 
 
-def _rektlvl(c, num, adj_val, alignment='row', prot_val=[16, 235], min_val=16, max_val=235):
+def _rektlvl(c, num, adj_val, alignment="row", prot_val=[16, 235], min_val=16, max_val=235):
     if adj_val == 0:
         return c
     from vsutil import get_y, scale_value
+
     core = vs.core
 
     if (adj_val > 100 or adj_val < -100) and prot_val:
@@ -29,30 +30,32 @@ def _rektlvl(c, num, adj_val, alignment='row', prot_val=[16, 235], min_val=16, m
     if prot_val:
         adj_val = scale_value(adj_val * 2.19, 8, bits)
         if adj_val > 0:
-            expr = f'x {min_val} - 0 <= {min_val} {max_val} {adj_val} - {min_val} - 0 <= 0.01 {max_val} {adj_val} - {min_val} - ? / {diff_val} * x {min_val} - {max_val} {adj_val} - {min_val} - 0 <= 0.01 {max_val} {adj_val} - {min_val} - ? / {diff_val} * {min_val} + ?'
+            expr = f"x {min_val} - 0 <= {min_val} {max_val} {adj_val} - {min_val} - 0 <= 0.01 {max_val} {adj_val} - {min_val} - ? / {diff_val} * x {min_val} - {max_val} {adj_val} - {min_val} - 0 <= 0.01 {max_val} {adj_val} - {min_val} - ? / {diff_val} * {min_val} + ?"  # noqa: E501
         elif adj_val < 0:
-            expr = f'x {min_val} - 0 <= {min_val} {diff_val} / {max_val} {adj_val} + {min_val} - * x {min_val} - {diff_val} / {max_val} {adj_val} + {min_val} - * {min_val} + ?'
+            expr = f"x {min_val} - 0 <= {min_val} {diff_val} / {max_val} {adj_val} + {min_val} - * x {min_val} - {diff_val} / {max_val} {adj_val} + {min_val} - * {min_val} + ?"  # noqa: E501
 
         if isinstance(prot_val, int):
             prot_top = [scale_value(255 - prot_val, 8, bits), scale_value(245 - prot_val, 8, bits)]
-            expr += f' x {prot_top[0]} - -{ten} / 0 max 1 min * x x {prot_top[1]} - {ten} / 0 max 1 min * +'
+            expr += f" x {prot_top[0]} - -{ten} / 0 max 1 min * x x {prot_top[1]} - {ten} / 0 max 1 min * +"
         else:
             prot_val = [scale_value(prot_val[0], 8, bits), scale_value(prot_val[1], 8, bits)]
-            expr += f' x {prot_val[1]} - -{ten} / 0 max 1 min * x x {prot_val[1]} {ten} - - {ten} / 0 max 1 min * + {prot_val[0]} x - -{ten} / 0 max 1 min * x {prot_val[0]} {ten} + x - {ten} / 0 max 1 min * +'
+            expr += f" x {prot_val[1]} - -{ten} / 0 max 1 min * x x {prot_val[1]} {ten} - - {ten} / 0 max 1 min * + {prot_val[0]} x - -{ten} / 0 max 1 min * x {prot_val[0]} {ten} + x - {ten} / 0 max 1 min * +"  # noqa: E501
 
-        last = lambda x: core.std.Expr(x, expr=expr)
+        last = lambda x: core.std.Expr(x, expr=expr)  # noqa: E731
     else:
         adj_val = adj_val * (max_val - min_val) / 100
         if adj_val < 0:
-            last = lambda x: core.std.Levels(
-                x, min_in=min_val, max_in=max_val, min_out=min_val, max_out=max_val + adj_val)
+            last = lambda x: core.std.Levels(  # noqa: E731
+                x, min_in=min_val, max_in=max_val, min_out=min_val, max_out=max_val + adj_val
+            )
         elif adj_val > 0:
-            last = lambda x: core.std.Levels(
-                x, min_in=min_val, max_in=max_val - adj_val, min_out=min_val, max_out=max_val)
+            last = lambda x: core.std.Levels(  # noqa: E731
+                x, min_in=min_val, max_in=max_val - adj_val, min_out=min_val, max_out=max_val
+            )
 
-    if alignment == 'row':
+    if alignment == "row":
         last = rekt_fast(c, last, bottom=c.height - num - 1, top=num)
-    elif alignment == 'column':
+    elif alignment == "column":
         last = rekt_fast(c, last, right=c.width - num - 1, left=num)
     else:
         raise ValueError("Alignment must be 'row' or 'column'.")
@@ -64,7 +67,7 @@ def _rektlvl(c, num, adj_val, alignment='row', prot_val=[16, 235], min_val=16, m
 
 
 def rektlvls(clip, rownum=None, rowval=None, colnum=None, colval=None, prot_val=[16, 235], min_val=16, max_val=235):
-    '''
+    """
     More or less a wrapper around std.Levels with rekt_fast for darkening or brightening lines, usually on frame edges.
     :param clip: Clip to be processed.
     :param rownum: Row(s) to be processed.
@@ -77,7 +80,7 @@ def rektlvls(clip, rownum=None, rowval=None, colnum=None, colval=None, prot_val=
                      The AviSynth script this is from:
                      https://github.com/Asd-g/AviSynthPlus-Scripts/blob/master/FixBrightnessProtect3.avsi
     :return: Clip with first plane's values adjusted by adj_val.
-    '''
+    """  # noqa: E501
     if rownum is not None:
         if isinstance(rownum, int):
             rownum = [rownum]
@@ -86,13 +89,9 @@ def rektlvls(clip, rownum=None, rowval=None, colnum=None, colval=None, prot_val=
         for _ in range(len(rownum)):
             if rownum[_] < 0:
                 rownum[_] = clip.height + rownum[_]
-            clip = _rektlvl(clip,
-                            rownum[_],
-                            rowval[_],
-                            alignment='row',
-                            prot_val=prot_val,
-                            min_val=min_val,
-                            max_val=max_val)
+            clip = _rektlvl(
+                clip, rownum[_], rowval[_], alignment="row", prot_val=prot_val, min_val=min_val, max_val=max_val
+            )
     if colnum is not None:
         if isinstance(colnum, int):
             colnum = [colnum]
@@ -101,11 +100,7 @@ def rektlvls(clip, rownum=None, rowval=None, colnum=None, colval=None, prot_val=
         for _ in range(len(colnum)):
             if colnum[_] < 0:
                 colnum[_] = clip.width + colnum[_]
-            clip = _rektlvl(clip,
-                            colnum[_],
-                            colval[_],
-                            alignment='column',
-                            prot_val=prot_val,
-                            min_val=min_val,
-                            max_val=max_val)
+            clip = _rektlvl(
+                clip, colnum[_], colval[_], alignment="column", prot_val=prot_val, min_val=min_val, max_val=max_val
+            )
     return clip
